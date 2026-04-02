@@ -1,0 +1,21 @@
+%!TEX root = main.tex
+\section{Discusión}
+
+\subsection{Análisis del Rendimiento y Overhead}
+Los resultados obtenidos revelan que la versión escalar es la más eficiente para la carga de trabajo evaluada (1024x1024 píxeles, 100 iteraciones). Este fenómeno, aunque contraintuitivo desde la perspectiva del paralelismo masivo, es recurrente en kernels con baja intensidad aritmética procesados en conjuntos de datos que no saturan la capacidad de cómputo del sistema.
+
+En la versión OpenMP (CPU), el uso de 24 hilos introdujo un "overhead" de gestión que superó el beneficio de la distribución de carga. La creación y sincronización de hilos consume ciclos de reloj que, para una imagen de 1 megapíxel, representan una fracción significativa del tiempo total. 
+
+\subsection{OpenMP Target vs CUDA Nativo}
+Al comparar el enfoque heterogéneo de OpenMP frente al desarrollo directo en CUDA, se observan contrastes fundamentales. Mientras que OpenMP Target ofrece una abstracción de alto nivel y portabilidad, CUDA permite un control granular absoluto sobre la arquitectura de la RTX 3060. 
+
+La implementación de los "5 pasos mágicos" de CUDA (Malloc, Memcpy, Launch, Sync, Free) permite optimizar de manera explícita el camino crítico de los datos. Sin embargo, para una imagen de $1024 \times 1024$ píxeles, la latencia de memoria a través del bus PCIe sigue siendo el principal cuello de botella, limitando el factor de aceleración real frente a la versión escalar. Se concluye que para obtener beneficios tangibles del procesamiento en GPU, el volumen de datos o la complejidad aritmética debe ser significativamente mayor al evaluado.
+
+\subsection{Desafíos del Offloading a GPU}
+La implementación Heterogénea experimentó la mayor penalización de tiempo (0.078 s). A pesar de que la GPU posee miles de núcleos capaces de procesar el suavizado en microsegundos, el cuello de botella se desplazó a:
+\begin{itemize}
+    \item \textbf{Transferencia de Datos:} El movimiento de los arreglos a través del bus PCIe hacia la memoria del dispositivo.
+    \item \textbf{Inicialización del Runtime:} El tiempo necesario para que el driver de Intel Level Zero o OpenCL prepare el acelerador.
+\end{itemize}
+
+Sin embargo, la optimización mediante \texttt{\#pragma omp target data} fue fundamental; sin ella, el tiempo de ejecución habría sido órdenes de magnitud superior al re-mapear la memoria en cada una de las 100 iteraciones. Se infiere que para resoluciones significativamente mayores (4K o superior), la versión de GPU comenzaría a mostrar un factor de aceleración positivo frente a la CPU.

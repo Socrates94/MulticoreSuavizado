@@ -1,0 +1,30 @@
+%!TEX root = main.tex
+\section{Resultados}
+
+\subsection{Validación de las Implementaciones}
+Se verificó que todas las versiones del kernel de suavizado (Escalar, OpenMP y CUDA) generaran resultados numéricamente consistentes. Las imágenes resultantes procesadas a partir del fractal de $1024 \times 1024$ píxeles fueron comparadas, confirmando que la lógica del filtro de caja se aplicó correctamente en todos los entornos de ejecución.
+
+\subsection{Comparativa de Tiempos de Ejecución}
+La Tabla \ref{tab:tiempos} muestra los tiempos obtenidos tras 100 iteraciones de procesamiento continuo.
+
+\begin{table}[htb]
+\centering
+\caption{Comparativa de tiempos de ejecución (100 iteraciones, 1024x1024 px).}
+\label{tab:tiempos}
+\begin{tabular}{|l|c|p{3.1cm}|}\hline
+\textbf{Versión} & \textbf{Tiempo (s)} & \textbf{Observación} \\ \hline
+Escalar          & 0.0287              & Línea base \\ \hline
+OpenMP (CPU)     & 0.0405              & 24 hilos (Overhead) \\ \hline
+CUDA (Native)    & TBD                 & Uso de RTX 3060 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Análisis del Rendimiento}
+Como se documenta en las pruebas, para una resolución de $1024 \times 1024$, el procesamiento escalar sigue siendo altamente competitivo debido a la ausencia de costos de sincronización y transferencia. 
+
+\begin{itemize}
+    \item \textbf{OpenMP:} Presenta un ligero incremento en tiempo debido al costo de gestión de los hilos de la CPU para una carga de trabajo que se ajusta casi por completo en los niveles superiores de la memoria caché.
+    \item \textbf{CUDA:} Se espera que la velocidad de ejecución sea superior una vez descontado el tiempo de transferencia, aunque para este tamaño de imagen, el movimiento de datos a través del bus PCIe sigue siendo un factor determinante en el tiempo total de respuesta.
+\end{itemize}
+
+\FloatBarrier

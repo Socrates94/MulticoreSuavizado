@@ -1,0 +1,85 @@
+%!TEX root = main.tex
+\section{Metodología}
+
+\subsection{Descripción del Kernel de Suavizado}
+El algoritmo implementado realiza un filtrado espacial de promedio (Media) sobre una ventana de $3 \times 3$ píxeles. El kernel recorre la imagen de entrada y calcula el valor de salida para cada píxel como la suma de sus 8 vecinos más él mismo, dividida por 9. Para evitar problemas de bordes, el procesamiento se realiza desde el segundo hasta el penúltimo píxel en ambas dimensiones.
+
+\subsection{Plataforma Experimental}
+Las pruebas se realizaron en un entorno Linux con acceso a herramientas de desarrollo de alto rendimiento. Las especificaciones del sistema y el software utilizado son:
+
+\begin{itemize}
+    \item \textbf{Procesador (CPU):} Arquitectura x86\_64 multi-núcleo (24 hilos lógicos activos en las pruebas OpenMP).
+    \item \textbf{Procesador (GPU):} NVIDIA GeForce RTX 3060 con 12 GB de VRAM.
+    \item \textbf{Compiladores:} 
+        \begin{itemize}
+            \item \texttt{g++} con optimización \texttt{-O3} para las versiones Escalar y OpenMP CPU.
+            \item \texttt{icpx} (Intel C++ Compiler) para la versión OpenMP Target.
+            \item \texttt{nvcc} (NVIDIA CUDA Compiler) para la versión nativa de GPU.
+        \end{itemize}
+    \item \textbf{Imagen de Prueba:} Un fractal del conjunto de Mandelbrot generado sintéticamente con una resolución de $1024 \times 1024$ píxeles en formato PGM P2.
+\end{itemize}
+
+\subsection{Verificación de Hardware e Instalación}
+Para confirmar la presencia de una GPU compatible, se utilizó el comando \texttt{nvidia-smi} en la terminal de Linux. Este comando proporciona información sobre el modelo de la tarjeta, la versión del controlador y el uso de memoria de video.
+
+La preparación del entorno de desarrollo para CUDA requirió la instalación del kit de herramientas mediante el gestor de paquetes de la distribución:
+\begin{lstlisting}[language=bash]
+sudo apt update && sudo apt install nvidia-cuda-toolkit
+\end{lstlisting}
+Este paquete dota al sistema de las librerías necesarias y el compilador \texttt{nvcc}, sin interferir con la salida de video del sistema.
+
+\subsection{Procedimiento de Compilación}
+Se definieron tres flujos de compilación específicos para evaluar cada paradigma de paralelismo:
+
+\begin{itemize}
+    \item \textbf{Versión Escalar:} Optimizada para un solo núcleo.
+    \begin{lstlisting}[language=bash]
+g++ -g -O3 -march=native -o scalar_v vesionEscalar.cpp
+    \end{lstlisting}
+
+    \item \textbf{Versión OpenMP CPU:} Habilitando el soporte para hilos.
+    \begin{lstlisting}[language=bash]
+g++ -g -O3 -march=native -fopenmp -o openmp_v versionOpenMP.cpp
+    \end{lstlisting}
+
+    \item \textbf{Versión Heterogénea (GPU):} Utilizando el compilador de Intel y objetivos de offloading.
+    \begin{lstlisting}[language=bash]
+icpx -fiopenmp -fopenmp-targets=spir64 -O3 -o heterogeneo_v versionHeterogeneo.cpp
+    \end{lstlisting}
+\end{itemize}
+
+\subsection{Implementaciones Detalladas}
+
+\subsubsection{Implementación Escalar}
+Consiste en un bucle anidado estándar en C++. Proporciona la línea base de rendimiento contra la cual se comparan las versiones paralelas. 
+
+\subsubsection{Implementación OpenMP CPU}
+Introduce la directiva \texttt{\#pragma omp parallel for collapse(2)}. Esta versión busca explotar el paralelismo a nivel de hilos distribuyendo las filas de la imagen entre los núcleos de la CPU. Para imágenes de resolución moderada (1MP), se espera observar el impacto del overhead de creación de hilos.
+
+\subsubsection{Implementación en CUDA (GPU Nativa)}
+Para maximizar el uso de la arquitectura NVIDIA, se desarrolló una versión en CUDA que sigue un flujo de trabajo de cinco pasos fundamentales, conocidos como la "magia" de la computación en GPU:
+
+\begin{enumerate}
+    \item \textbf{Definición del Kernel:} Se utiliza el calificador \texttt{\_\_global\_\_} para definir la función que se ejecutará en los núcleos de la GPU.
+    \item \textbf{Reserva de Memoria (VRAM):} Uso de \texttt{cudaMalloc} para asignar espacio en los 12 GB de la RTX 3060.
+    \item \textbf{Transferencia Host-to-Device:} Uso de \texttt{cudaMemcpy} para mover la imagen fractal desde la RAM del sistema hacia la memoria de video.
+    \item \textbf{Lanzamiento de Malla (\textit{Kernel Launch}):} Ejecución paralela masiva mediante la sintaxis de triple chevron \texttt{<<<grid, block>>>}, donde cada hilo procesa un píxel.
+    \item \textbf{Sincronización y Retorno:} Se espera a que el acelerador termine (\texttt{cudaDeviceSynchronize}) y se copian los resultados de vuelta al host.
+\end{enumerate}
+
+\begin{figure}[htb]
+    \centering
+    \begin{minipage}{\linewidth}
+    {\footnotesize
+    \begin{lstlisting}[language={C++}]
+// Triple chevron: Disparo de miles de hilos
+smoothingKernel<<<gridSize, blockSize>>>(d_input, d_output, width, height);
+cudaDeviceSynchronize();
+    \end{lstlisting}
+    }
+    \end{minipage}
+    \caption{Sintaxis de lanzamiento de kernel en CUDA para procesamiento paralelo masivo.}
+\label{fig:cuda_launch}
+\end{figure}
+
+\FloatBarrier
