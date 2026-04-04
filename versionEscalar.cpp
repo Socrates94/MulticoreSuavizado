@@ -84,6 +84,7 @@ void suavizado_scalar(const float* __restrict input, float* __restrict output, i
 }
 
 int main() {
+    
     int WIDTH, HEIGHT;
     vector<float> input_img;
     string input_file;
