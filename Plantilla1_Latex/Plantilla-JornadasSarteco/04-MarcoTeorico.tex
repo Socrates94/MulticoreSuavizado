@@ -26,4 +26,4 @@ Tanto en OpenMP Target como en CUDA, la GPU ejecuta miles de hilos de forma conc
 Para la evaluación de las implementaciones, se utilizan métricas de tiempo de ejecución y análisis de "overhead". El overhead se define como el tiempo adicional requerido para la creación de hilos, sincronización y transferencia de datos a través del bus PCIe (en el caso de la GPU), lo cual puede superar el beneficio del paralelismo en conjuntos de datos pequeños.
 
 \subsection{Formatos de Imagen PGM}
-Se emplea el formato \textit{Portable GrayMap} (PGM) en su variante P2 (ASCII). Este formato permite una representación sencilla de la matriz de intensidades de gris, facilitando la validación visual del suavizado mediante la inspección de los archivos de salida procesados por cada una de las versiones del kernel.
+Se emplea el formato \textit{Portable GrayMap} (PGM) en su variante binaria P5. Este formato permite una representación eficiente de la matriz de intensidades de gris para resoluciones masivas de 8K ($8192 \times 8192$), facilitando la validación visual del suavizado mediante la inspección de los archivos de salida procesados por cada una de las versiones del kernel.

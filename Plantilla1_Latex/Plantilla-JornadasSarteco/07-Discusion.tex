@@ -1,10 +1,20 @@
 %!TEX root = main.tex
 \section{Discusión}
 
-\subsection{Análisis del Rendimiento y Overhead}
-Los resultados obtenidos revelan que la versión escalar es la más eficiente para la carga de trabajo evaluada (1024x1024 píxeles, 100 iteraciones). Este fenómeno, aunque contraintuitivo desde la perspectiva del paralelismo masivo, es recurrente en kernels con baja intensidad aritmética procesados en conjuntos de datos que no saturan la capacidad de cómputo del sistema.
+\subsection{El Punto de Inflexión: 1MP vs 67MP}
+En estudios previos con resoluciones de $1024 \times 1024$ (1 Megapíxel), se observó que la versión escalar era competitiva debido a que los tiempos de transferencia a GPU superaban el tiempo de cómputo. Sin embargo, al escalar a 8K ($8192 \times 8192$), el volumen de datos (67 Megapíxeles) satura la capacidad de proceso secuencial de la CPU, permitiendo que la arquitectura paralela masiva de la GPU demuestre su verdadera ventaja. El costo de mover ~67 MB por el bus PCIe se vuelve insignificante frente a los casi 4 minutos que requiere el procesador para realizar las 100 iteraciones del filtro.
 
-En la versión OpenMP (CPU), el uso de 24 hilos introdujo un "overhead" de gestión que superó el beneficio de la distribución de carga. La creación y sincronización de hilos consume ciclos de reloj que, para una imagen de 1 megapíxel, representan una fracción significativa del tiempo total. 
+\subsection{Especialización en CUDA vs Abstracción en PyTorch}
+Uno de los hallazgos más relevantes fue la comparativa entre la implementación manual en CUDA y el uso de PyTorch. 
+\begin{itemize}
+    \item \textbf{CUDA (0.35 s):} Al ser un kernel especializado, aprovecha al máximo la jerarquía de memoria y minimiza el overhead de la API. Logró el mejor tiempo absoluto.
+    \item \textbf{PyTorch (0.57 s):} Aunque utiliza internamente kernels de CUDA (cuDNN), el costo de las 100 llamadas desde el intérprete de Python y la naturaleza generalista de su función de convolución introducen un retraso del 38\% respecto a la versión nativa.
+\end{itemize}
+
+Se concluye que para aplicaciones donde el rendimiento es crítico, la programación manual en CUDA sigue siendo superior, mientras que PyTorch es ideal para un desarrollo rápido con un rendimiento muy aceptable.
+
+\subsection{Efectividad de OpenMP en CPU}
+La versión de OpenMP con 24 hilos logró un speedup de 11.2x frente a la versión escalar. Aunque es una mejora significativa, la limitación del ancho de banda de memoria de la CPU impide que el escalado sea lineal respecto al número de núcleos, quedando muy por detrás de las soluciones basadas en GPU.
 
 \subsection{OpenMP Target vs CUDA Nativo}
 Al comparar el enfoque heterogéneo de OpenMP frente al desarrollo directo en CUDA, se observan contrastes fundamentales. Mientras que OpenMP Target ofrece una abstracción de alto nivel y portabilidad, CUDA permite un control granular absoluto sobre la arquitectura de la RTX 3060. 

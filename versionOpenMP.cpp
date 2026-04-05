@@ -1,4 +1,5 @@
-// Compilación: g++ -O3 -march=native -fno-inline -fopenmp -o open_v versionOpenMP.cpp
+
+// Compilación: g++ -O3 -march=native -fno-inline -fopenmp -o open_v versionOpenMP.cpp && ./open_v
 
 #include <iostream>
 #include <vector>
@@ -67,8 +68,9 @@ void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     file.close();
 }
 
-// KERNEL DE SUAVIZADO OPENMP (Box Filter 3x3)
+// Kernel de suavizado OpenMP (Box Filter 3x3)
 void suavizado_openmp(const float* __restrict input, float* __restrict output, int w, int h) {
+
     #pragma omp parallel for collapse(2)
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
@@ -86,8 +88,10 @@ void suavizado_openmp(const float* __restrict input, float* __restrict output, i
 }
 
 int main() {
+
     int WIDTH, HEIGHT;
     vector<float> input_img;
+
     string input_file;
     
     cout << "Ingresa el nombre de la imagen a procesar (ej. fractal.pgm o ajedrez.pgm): ";
@@ -107,6 +111,7 @@ int main() {
     for (int i = 0; i < N; i++) output_img[i] = input_img[i];
 
     cout << "Versión OpenMP - Hilos disponibles: " << omp_get_max_threads() << endl;
+    cout << "Procesando ...\n";
 
     // 2. EJECUCIÓN Y MEDICIÓN DE TIEMPO
     auto start = chrono::high_resolution_clock::now();

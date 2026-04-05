@@ -1,4 +1,4 @@
-// Compilación: nvcc -O3 -o cuda_v cuda.cu
+// Compilación: nvcc -O3 -o cuda_v cuda.cu && ./cuda_v
 
 #include <chrono>
 #include <cuda_runtime.h>

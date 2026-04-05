@@ -1,4 +1,5 @@
-// Compilación: icpx -g -O3 -march=native -fno-inline -o scalar_v vesionEscalar.cpp
+
+// Compilación: g++ -O3 -o scalar_v vesionEscalar.cpp && ./scalar_v
 
 #include <iostream>
 #include <vector>
@@ -66,8 +67,9 @@ void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     file.close();
 }
 
-// KERNEL DE SUAVIZADO ESCALAR (Box Filter 3x3)
+// Kernel de suavizado escalar (Box Filter 3x3)
 void suavizado_scalar(const float* __restrict input, float* __restrict output, int w, int h) {
+
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             float sum = 0.0f;
@@ -84,14 +86,16 @@ void suavizado_scalar(const float* __restrict input, float* __restrict output, i
 }
 
 int main() {
-    
+
     int WIDTH, HEIGHT;
     vector<float> input_img;
+
     string input_file;
     
     cout << "Ingresa el nombre de la imagen a procesar (ej. fractal.pgm o ajedrez.pgm): ";
     cin >> input_file;
-    
+    cout << "Procesando " << input_file << " espere un momento esto demorara un rato ...\n";
+
     // 1. Cargar imagen original PGM
     leer_pgm(input_file, input_img, WIDTH, HEIGHT);
     if(input_img.empty()) {

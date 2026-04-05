@@ -1,5 +1,5 @@
 // Cargar variables de entorno: source /opt/intel/oneapi/setvars.sh
-// Compilación: icpx -fiopenmp -fopenmp-targets=spir64 -O3 -march=native -o heterogeneo_v versionHeterogeneo.cpp
+// Compilación: icpx -fiopenmp -fopenmp-targets=spir64 -O3 -march=native -o heterogeneo_v versionHeterogeneo.cpp && ./heterogeneo_v
 
 #include <iostream>
 #include <vector>

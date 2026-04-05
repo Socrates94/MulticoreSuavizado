@@ -1,4 +1,6 @@
-// Compilación: g++ -O3 -o fractal_pesado fractal_pesado.cpp
+
+// Compilación: g++ -O3 -o fractal_pesado fractal_pesado.cpp && ./fractal_pesado
+
 #include <iostream>
 #include <fstream>
 #include <complex>
@@ -75,6 +77,6 @@ int main() {
     file.write(reinterpret_cast<char*>(pixels.data()), pixels.size());
     file.close();
 
-    cout << "Fractal 8K 'fractal_pesado.pgm' generado con éxito (67 MB)." << endl;
+    cout << "Fractal 8K 'fractalJulia.pgm' generado con éxito (67 MB)." << endl;
     return 0;
 }

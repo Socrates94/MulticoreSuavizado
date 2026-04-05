@@ -2,29 +2,34 @@
 \section{Resultados}
 
 \subsection{Validación de las Implementaciones}
-Se verificó que todas las versiones del kernel de suavizado (Escalar, OpenMP y CUDA) generaran resultados numéricamente consistentes. Las imágenes resultantes procesadas a partir del fractal de $1024 \times 1024$ píxeles fueron comparadas, confirmando que la lógica del filtro de caja se aplicó correctamente en todos los entornos de ejecución.
+Se verificó que todas las versiones del kernel de suavizado generaran resultados numéricamente consistentes. La imagen fractal de $8192 \times 8192$ píxeles fue procesada durante 100 iteraciones en cada entorno, confirmando que la lógica del filtro de caja se aplicó correctamente tanto en CPU (Escalar, OpenMP) como en GPU (CUDA, PyTorch).
 
 \subsection{Comparativa de Tiempos de Ejecución}
-La Tabla \ref{tab:tiempos} muestra los tiempos obtenidos tras 100 iteraciones de procesamiento continuo.
+La Tabla \ref{tab:tiempos} muestra los tiempos obtenidos tras 100 iteraciones sobre la imagen pesada de 8K.
 
 \begin{table}[htb]
 \centering
-\caption{Comparativa de tiempos de ejecución (100 iteraciones, 1024x1024 px).}
+\caption{Comparativa de tiempos de ejecución (100 iteraciones, 8192x8192 px).}
 \label{tab:tiempos}
-\begin{tabular}{|l|c|p{3.1cm}|}\hline
-\textbf{Versión} & \textbf{Tiempo (s)} & \textbf{Observación} \\ \hline
-Escalar          & 0.0287              & Línea base \\ \hline
-OpenMP (CPU)     & 0.0405              & 24 hilos (Overhead) \\ \hline
-CUDA (Native)    & TBD                 & Uso de RTX 3060 \\ \hline
+\begin{adjustbox}{max width=\columnwidth}
+\begin{tabular}{|l|c|l|}\hline
+\textbf{Versión} & \textbf{Tiempo (s)} & \textbf{Speedup (vs Escalar)} \\ \hline
+Escalar (CPU)    & 239.23              & 1.0x (Referencia) \\ \hline
+OpenMP (CPU)     & 21.30               & $\approx$ 11.2x \\ \hline
+Heterogénea (GPU) & TBD                & - \\ \hline
+PyTorch (GPU)    & 0.57                & $\approx$ 419.7x \\ \hline
+CUDA (Nativo)    & 0.35                & $\approx$ 673.8x \\ \hline
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 \subsection{Análisis del Rendimiento}
-Como se documenta en las pruebas, para una resolución de $1024 \times 1024$, el procesamiento escalar sigue siendo altamente competitivo debido a la ausencia de costos de sincronización y transferencia. 
+A escala de 8K (67 millones de píxeles), el panorama de rendimiento cambia drásticamente respecto a resoluciones menores:
 
 \begin{itemize}
-    \item \textbf{OpenMP:} Presenta un ligero incremento en tiempo debido al costo de gestión de los hilos de la CPU para una carga de trabajo que se ajusta casi por completo en los niveles superiores de la memoria caché.
-    \item \textbf{CUDA:} Se espera que la velocidad de ejecución sea superior una vez descontado el tiempo de transferencia, aunque para este tamaño de imagen, el movimiento de datos a través del bus PCIe sigue siendo un factor determinante en el tiempo total de respuesta.
+    \item \textbf{Escalar vs Paralelo:} La versión escalar tarda casi 4 minutos en completar la tarea, mientras que la paralelización en CPU con 24 hilos (OpenMP) reduce el tiempo a 21 segundos, demostrando un uso eficiente del hardware multi-núcleo para grandes volúmenes de datos.
+    \item \textbf{Dominio de la GPU:} Tanto CUDA como PyTorch logran procesar la imagen en menos de un segundo. El factor de aceleración de CUDA es de 673x frente a la CPU, confirmando que para imágenes de alta resolución, la potencia de cómputo paralela de la GPU amortiza completamente el costo de transferencia de datos.
+    \item \textbf{Especialización vs Librería:} CUDA supera a PyTorch en un 38\%. Mientras que PyTorch ofrece una simplicidad extrema en el desarrollo, su sobrecarga de API y naturaleza generalista lo hacen ligeramente más lento que un kernel de CUDA escrito a mano y optimizado específicamente para este problema.
 \end{itemize}
 
 \FloatBarrier
