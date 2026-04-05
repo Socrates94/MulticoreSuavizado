@@ -1,4 +1,4 @@
-// Compilar: g++ -fopenmp generador_mandelbrot.cpp -o generador_mandelbrot && ./generador_mandelbrot
+// Compilar: g++ -O3 -o fractalMandelbrot fractalMandelbrot.cpp && ./fractalMandelbrot
 
 #include <iostream>
 #include <fstream>

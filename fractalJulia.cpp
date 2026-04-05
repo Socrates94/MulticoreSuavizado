@@ -1,5 +1,5 @@
 
-// Compilación: g++ -O3 -o fractal_pesado fractal_pesado.cpp && ./fractal_pesado
+// Compilación: g++ -O3 -o fractalJulia fractalJulia.cpp && ./fractalJulia
 
 #include <iostream>
 #include <fstream>
