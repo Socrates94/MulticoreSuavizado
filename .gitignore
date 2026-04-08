@@ -1,0 +1,14 @@
+# Ignore folders
+OpenMP/
+Plantilla1_Latex/
+
+# Ignore large image files (recommended since push failed)
+*.pgm
+
+# Ignore binary files (executables)
+fractalMandelbrot
+fractalJulia
+versionEscalar
+versionOpenMP
+versionHeterogeneo
+cuda

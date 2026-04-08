@@ -67,7 +67,7 @@ void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     file.close();
 }
 
-// Kernel de suavizado escalar (Box Filter 3x3)
+// Kernel de suavizado escalar (Box Blur 3x3)
 void suavizado_scalar(const float* __restrict input, float* __restrict output, int w, int h) {
 
     for (int y = 0; y < h; y++) {

@@ -1,5 +1,5 @@
 
-// Compilación: g++ -O3 -o fractalJulia fractalJulia.cpp && ./fractalJulia
+// Compilación: g++ -O3 fractalJulia.cpp -o fractalJulia && ./fractalJulia
 
 #include <iostream>
 #include <fstream>
@@ -23,9 +23,9 @@ int main() {
     // Constante compleja para el conjunto de Julia: -0.8 + 0.156i
     const complex<double> c(-0.8, 0.156);
 
-    ofstream file("fractal_pesado.pgm", ios::binary);
+    ofstream file("fractalJulia.pgm", ios::binary);
     if (!file.is_open()) {
-        cerr << "Error al crear fractal_pesado.pgm" << endl;
+        cerr << "Error al crear fractalJulia.pgm" << endl;
         return -1;
     }
 

@@ -68,6 +68,30 @@ void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     file.close();
 }
 
+
+// Kernel de suavizado OpenMP (Box Filter 3x3)
+// void suavizado_openmp(const float* __restrict input, float* __restrict output, int w, int h) {
+
+//     #pragma omp parallel shared(input, output, w, h)
+//     {
+//         #pragma omp for
+//         for (int y = 0; y < h; y++) {
+//             for (int x = 0; x < w; x++) {
+//                 float sum = 0.0f;
+//                 for (int ky = -1; ky <= 1; ky++) {
+//                     for (int kx = -1; kx <= 1; kx++) {
+//                         int nx = std::max(0, std::min(x + kx, w - 1));
+//                         int ny = std::max(0, std::min(y + ky, h - 1));
+//                         sum += input[ny * w + nx];
+//                     }
+//                 }
+//                 output[y * w + x] = sum / 9.0f;
+//             }
+//         }
+//     }
+// }
+
+
 // Kernel de suavizado OpenMP (Box Filter 3x3)
 void suavizado_openmp(const float* __restrict input, float* __restrict output, int w, int h) {
 
@@ -86,6 +110,10 @@ void suavizado_openmp(const float* __restrict input, float* __restrict output, i
         }
     }
 }
+
+
+
+
 
 int main() {
 
@@ -120,9 +148,13 @@ int main() {
     for(int i = 0; i < ITERATIONS; i++) {
         suavizado_openmp(input_img.data(), output_img, WIDTH, HEIGHT);
         // Hacer que el resultado sea la entrada de la siguiente pasada
-        #pragma omp parallel for
-        for(int n = 0; n < WIDTH * HEIGHT; n++) {
-            input_img[n] = output_img[n];
+        // Estructura de bloque clásica
+        #pragma omp parallel shared(input_img, output_img, WIDTH, HEIGHT)
+        {
+            #pragma omp for
+            for(int n = 0; n < WIDTH * HEIGHT; n++) {
+                input_img[n] = output_img[n];
+            }
         }
     }
     
