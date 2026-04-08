@@ -1,7 +1,0 @@
-%!TEX root = main.tex
-
-\begin{abstract}
-Este artículo presenta un análisis comparativo de rendimiento de un kernel de suavizado de imágenes (box filter 3x3) aplicado a una resolución extremada de 8K ($8192 \times 8192$ píxeles). Se evaluaron cinco paradigmas de programación: escalar (secuencial), multinúcleo (hilos CPU con OpenMP), heterogéneo (offloading a GPU), CUDA nativo y el uso de librerías de alto nivel (PyTorch con aceleración GPU). Los resultados muestran que, a diferencia de resoluciones menores, el procesamiento en 8K permite mitigar el impacto del overhead de transferencia de datos, logrando que la versión en CUDA supere a la escalar por un factor superior a 670x. Asimismo, se comparó la especialización de kernels en CUDA frente a la abstracción de PyTorch, observando que el control granular del hardware permite una reducción de tiempo del 38\% frente a la librería generalista.
-
-\textbf{Palabras clave:} Suavizado de imágenes, CUDA, PyTorch, OpenMP, 8K.
-\end{abstract}

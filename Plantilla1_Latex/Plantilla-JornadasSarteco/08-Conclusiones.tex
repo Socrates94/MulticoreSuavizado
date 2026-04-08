@@ -1,5 +1,0 @@
-%!TEX root = main.tex
-\section{Conclusiones}
-Este estudio experimental demuestra que la eficacia de los paradigmas de paralelismo (Multicore, CUDA y PyTorch) está condicionada por el volumen de datos. Mientras que para imágenes pequeñas el overhead de gestión es prohibitivo, en resoluciones 8K ($8192 \times 8192$), la GPU proporciona una aceleración masiva del 673x frente a la ejecución escalar secuencial. 
-
-Se concluye que la especialización del hardware es clave: aunque PyTorch ofrece un desarrollo rápido y productivo, la implementación manual en CUDA sigue siendo imbatible cuando el objetivo es exprimir al máximo el rendimiento del sistema. Para investigaciones futuras, la integración de CUDA con compiladores JIT (como \texttt{torch.compile}) podría reducir la brecha de rendimiento sin sacrificar la simplicidad de Python.
