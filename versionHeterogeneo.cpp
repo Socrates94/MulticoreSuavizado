@@ -13,7 +13,7 @@
 
 using namespace std;
 
-// Función para leer imagen PGM
+// Lector PGM (P2/P5)
 void leer_pgm(const string& filename, vector<float>& buffer, int& w, int& h) {
     ifstream file(filename, ios::binary); 
     if (!file.is_open()) {
@@ -56,7 +56,7 @@ void leer_pgm(const string& filename, vector<float>& buffer, int& w, int& h) {
     file.close();
 }
 
-// Función para escribir PGM
+// Escritor PGM (P2)
 void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     ofstream file(filename);
     if (!file.is_open()) return;
@@ -68,15 +68,15 @@ void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     file.close();
 }
 
-// KERNEL DE SUAVIZADO HETEROGÉNEO (Box Filter 3x3 con Offloading)
+// Kernel  suavizado heterogéneo (Box Filter 3x3 con Offloading)
 void suavizado_heterogeneo(float* __restrict input, float* __restrict output, int w, int h, int iterations) {
     int N = w * h;
     
-    // Transferencia de datos inicial a la GPU
+    // Offloading a GPU OpenMP
     #pragma omp target data map(to: input[0:N]) map(tofrom: output[0:N])
     {
         for (int i = 0; i < iterations; i++) {
-            // Paralelización en la GPU
+            // Paralelización en device
             #pragma omp target teams distribute parallel for collapse(2)
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
@@ -92,13 +92,13 @@ void suavizado_heterogeneo(float* __restrict input, float* __restrict output, in
                     output[y * w + x] = sum / 9.0f;
                 }
             }
-            // Copiar salida a la entrada para la siguiente iteración (en la GPU)
+            // Retroalimentación en device
             #pragma omp target teams distribute parallel for
             for (int n = 0; n < N; n++) {
                 input[n] = output[n];
             }
         }
-    } // Los datos vuelven de la GPU automáticamente al final del bloque si se usó tofrom
+    } // Sincronización al final del bloque
 }
 
 int main() {

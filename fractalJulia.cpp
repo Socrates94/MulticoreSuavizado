@@ -11,9 +11,7 @@
 using namespace std;
 
 /**
- * Genera un Conjunto de Julia en resolución 8K (8192x8192).
- * Formato: P5 (PGM Binario) para mayor eficiencia ocupando solo ~67MB.
- * Este fractal es ideal para estresar algoritmos de suavizado en CPU (versión escalar).
+ * Genera un Conjunto de Julia 8K (8192x8192) en formato P5 (PGM Binario).
  */
 int main() {
     const int width = 8192;
@@ -53,7 +51,7 @@ int main() {
             
             double smooth_color = 0.0;
             if (n < max_iter) {
-                // Algoritmo de Renormalización para suavizado
+                // Renormalización para suavizado
                 double log_zn = log(abs(z));
                 double nu = log(log_zn / log(2.0)) / log(2.0);
                 smooth_color = (double)n + 1.0 - nu;
@@ -61,7 +59,7 @@ int main() {
 
             int pixel_val = 0;
             if (n < max_iter) {
-                // Mapeo sinusoidal para un look "heavy" y detallado
+                // Mapeo sinusoidal
                 pixel_val = static_cast<int>(255.0 * 0.5 * (1.0 + sin(0.15 * smooth_color + 3.0)));
                 pixel_val = max(0, min(255, pixel_val));
             } else {

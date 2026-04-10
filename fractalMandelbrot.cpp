@@ -7,7 +7,7 @@
 using namespace std;
 
 int main() {
-    // Generaremos otra imagen en 8K ultraHD para que funcione de "stress test"
+    // Imagen 8K para stress test
     int width = 7680; 
     int height = 4320;
     int max_iter = 255;
@@ -29,7 +29,7 @@ int main() {
     
     cout << "Generando Mandelbrot 8K (" << width << "x" << height << ")..." << endl;
     
-    // Usamos OpenMP en el propio generador para que termine en instantes
+    // Generación paralela con OpenMP
     #pragma omp parallel for schedule(dynamic)
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -37,12 +37,12 @@ int main() {
             double cr = min_re + (max_re - min_re) * x / width;
             double ci = min_im + (max_im - min_im) * y / height;
             
-            // z(n+1) = z(n)^2 + c  (Iniciando en Z = 0)
+            // z(n+1) = z(n)^2 + c
             double zr = 0.0;
             double zi = 0.0;
             int iter = 0;
             
-            // Evaluando si el punto escapa al infinito (el radio mayor a 2)
+            // Criterio de escape
             while (zr * zr + zi * zi <= 4.0 && iter < max_iter) {
                 double temp = zr * zr - zi * zi + cr; // Parte real
                 zi = 2.0 * zr * zi + ci;              // Parte imaginaria
@@ -55,7 +55,7 @@ int main() {
             // Si escapó rápido, será un tono más blanco/gris
             unsigned char pixel_val = 0;
             if (iter < max_iter) {
-                // Modulando para generar contrastes más extremos y vistosos (ideal para suavizar mas tarde)
+                // Mapeo de color con contraste
                 pixel_val = static_cast<unsigned char>((iter * 8) % 256);
             }
             

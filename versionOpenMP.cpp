@@ -13,7 +13,7 @@
 
 using namespace std;
 
-// Función para leer imagen PGM
+// Lector PGM (P2/P5)
 void leer_pgm(const string& filename, vector<float>& buffer, int& w, int& h) {
     ifstream file(filename, ios::binary); 
     if (!file.is_open()) {
@@ -56,7 +56,7 @@ void leer_pgm(const string& filename, vector<float>& buffer, int& w, int& h) {
     file.close();
 }
 
-// Función para escribir PGM
+// Escritor PGM (P2)
 void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     ofstream file(filename);
     if (!file.is_open()) return;
@@ -69,30 +69,9 @@ void escribir_pgm(const string& filename, float* buffer, int w, int h) {
 }
 
 
-// Kernel de suavizado OpenMP (Box Filter 3x3)
-// void suavizado_openmp(const float* __restrict input, float* __restrict output, int w, int h) {
-
-//     #pragma omp parallel shared(input, output, w, h)
-//     {
-//         #pragma omp for
-//         for (int y = 0; y < h; y++) {
-//             for (int x = 0; x < w; x++) {
-//                 float sum = 0.0f;
-//                 for (int ky = -1; ky <= 1; ky++) {
-//                     for (int kx = -1; kx <= 1; kx++) {
-//                         int nx = std::max(0, std::min(x + kx, w - 1));
-//                         int ny = std::max(0, std::min(y + ky, h - 1));
-//                         sum += input[ny * w + nx];
-//                     }
-//                 }
-//                 output[y * w + x] = sum / 9.0f;
-//             }
-//         }
-//     }
-// }
 
 
-// Kernel de suavizado OpenMP (Box Filter 3x3)
+// Kernel de suavizado OpenMP (Box Blur 3x3)
 void suavizado_openmp(const float* __restrict input, float* __restrict output, int w, int h) {
 
     #pragma omp parallel for collapse(2)
@@ -135,7 +114,7 @@ int main() {
     const int N = WIDTH * HEIGHT;
     float* output_img = (float*)_mm_malloc(N * sizeof(float), 32);
 
-    // Inicializar salida con la imagen original
+    // Inicializar salida
     for (int i = 0; i < N; i++) output_img[i] = input_img[i];
 
     cout << "Versión OpenMP - Hilos disponibles: " << omp_get_max_threads() << endl;
@@ -147,8 +126,7 @@ int main() {
     const int ITERATIONS = 100;
     for(int i = 0; i < ITERATIONS; i++) {
         suavizado_openmp(input_img.data(), output_img, WIDTH, HEIGHT);
-        // Hacer que el resultado sea la entrada de la siguiente pasada
-        // Estructura de bloque clásica
+        // Retroalimentación de salida a entrada
         #pragma omp parallel shared(input_img, output_img, WIDTH, HEIGHT)
         {
             #pragma omp for

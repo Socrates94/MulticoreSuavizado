@@ -5,7 +5,7 @@ import time
 import os
 
 def read_pgm(filename):
-    """Lee un archivo PGM en formato P5 (Binario)."""
+    """Lector PGM (P5)."""
     with open(filename, 'rb') as f:
         # Leer cabecera
         magic = f.readline().decode().strip()
@@ -28,7 +28,7 @@ def read_pgm(filename):
     return data.astype(np.float32), width, height, max_val
 
 def write_pgm(filename, data, width, height, max_val):
-    """Guarda un archivo PGM en formato P5 (Binario)."""
+    """Escritor PGM (P5)."""
     with open(filename, 'wb') as f:
         f.write(f"P5\n{width} {height}\n{max_val}\n".encode())
         # Asegurarse de que los datos estén en el rango 0-255 y sean uint8
@@ -58,17 +58,17 @@ def main():
         print("CUDA detectado. Usando GPU...")
         device = torch.device('cuda')
 
-    # Convertir a tensor [Batch=1, Channel=1, Height, Width]
+    # Formato tensor [B=1, C=1, H, W]
     img_tensor = torch.from_numpy(img_np).to(device).unsqueeze(0).unsqueeze(0)
 
-    # Definir el kernel de suavizado 3x3 (Box Filter)
+    # Kernel suavizado 3x3
     kernel = torch.ones((1, 1, 3, 3), device=device) / 9.0
 
     # 3. Aplicar suavizado (100 iteraciones)
     iterations = 100
     print(f"Aplicando suavizado ({iterations} iteraciones)...")
     
-    # Sincronizar para medición exacta
+    # Sincronización para medición
     if device.type == 'cuda':
         torch.cuda.synchronize()
         
@@ -77,7 +77,7 @@ def main():
     # Ejecución de las iteraciones
     with torch.no_grad():
         for i in range(iterations):
-            # Usamos replicate padding para coincidir con la lógica del kernel C++ (clamp)
+            # Padding replicado (equivalente a clamp)
             img_tensor = F.pad(img_tensor, (1, 1, 1, 1), mode='replicate')
             img_tensor = F.conv2d(img_tensor, kernel)
 

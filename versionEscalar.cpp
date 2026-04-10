@@ -12,7 +12,7 @@
 
 using namespace std;
 
-// Función para leer imagen PGM
+// Lector PGM (P2/P5)
 void leer_pgm(const string& filename, vector<float>& buffer, int& w, int& h) {
     ifstream file(filename, ios::binary); 
     if (!file.is_open()) {
@@ -55,7 +55,7 @@ void leer_pgm(const string& filename, vector<float>& buffer, int& w, int& h) {
     file.close();
 }
 
-// Función para escribir PGM
+// Escritor PGM (P2)
 void escribir_pgm(const string& filename, float* buffer, int w, int h) {
     ofstream file(filename);
     if (!file.is_open()) return;
@@ -116,7 +116,7 @@ int main() {
     const int ITERATIONS = 100;
     for(int i = 0; i < ITERATIONS; i++) {
         suavizado_scalar(input_img.data(), output_img, WIDTH, HEIGHT);
-        // Hacer que el resultado sea la entrada de la siguiente pasada
+        // Retroalimentación de salida a entrada
         for(int n = 0; n < WIDTH * HEIGHT; n++) {
             input_img[n] = output_img[n];
         }
